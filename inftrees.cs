@@ -1,7 +1,9 @@
-// inftrees.cs -- generate Huffman trees for efficient decoding
+﻿// inftrees.cs -- generate Huffman trees for efficient decoding
 // Copyright (C) 1995-2010 Mark Adler
 // Copyright (C) 2007-2011 by the Authors
 // For conditions of distribution and use, see copyright notice in License.txt
+// This file has been modified and does not represent the original software.
+
 using System;
 
 namespace Free.Ports.zLib
@@ -90,32 +92,27 @@ namespace Free.Ports.zLib
 		// longest code or if it is less than the shortest code.
 
 		// Length codes 257..285 base
-		private static readonly ushort[] lbase=new ushort[31]
+		private static readonly ushort[] lbase=new ushort[32]
 		{
-			3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31,
-			35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258, 0, 0
+			3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258, 0, 0, 0
 		};
 
 		// Length codes 257..285 extra
-		private static readonly ushort[] lext=new ushort[31]
+		private static readonly ushort[] lext=new ushort[36]
 		{
-			16, 16, 16, 16, 16, 16, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18,
-			19, 19, 19, 19, 20, 20, 20, 20, 21, 21, 21, 21, 16, 73, 195
+			16, 16, 16, 16, 16, 16, 16, 16, 17, 17, 17, 17, 18, 18, 18, 18, 19, 19, 19, 19, 20, 20, 20, 20, 21, 21, 21, 21, 16, 72, 78, 0, 0, 0, 0, 0
 		};
 
 		// Distance codes 0..29 base
 		private static readonly ushort[] dbase=new ushort[32]
 		{
-			1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193,
-			257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145,
-			8193, 12289, 16385, 24577, 0, 0
+			1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577, 32769, 49153
 		};
 
 		// Distance codes 0..29 extra
 		private static readonly ushort[] dext=new ushort[32] 
 		{
-			16, 16, 16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22,
-			23, 23, 24, 24, 25, 25, 26, 26, 27, 27, 28, 28, 29, 29, 64, 64
+			16, 16, 16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 26, 26, 27, 27, 28, 28, 29, 29, 30, 30
 		};
 
 		// ushort* lens -> ushort[] lens + int lens_ind

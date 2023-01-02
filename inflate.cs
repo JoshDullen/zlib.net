@@ -1,9 +1,11 @@
-// inflate.cs -- internal inflate state definition & zlib decompression
+﻿// inflate.cs -- internal inflate state definition & zlib decompression
 // Copyright (C) 1995-2009 Mark Adler
 // Copyright (C) 2007-2011 by the Authors
 // For conditions of distribution and use, see copyright notice in License.txt
+// This file has been modified and does not represent the original software.
 
 using System;
+using System.Linq;
 
 namespace Free.Ports.zLib
 {
@@ -209,6 +211,9 @@ namespace Free.Ports.zLib
 			// update state and reset the rest of it
 			state.wrap=wrap;
 			state.wbits=(uint)windowBits;
+
+			// TODO: Reset the state to using window bits determined correcty by parameters.
+			state.wbits = 16;
 			return inflateReset(strm);
 		}
 
@@ -326,6 +331,36 @@ namespace Free.Ports.zLib
 		// fixed code decoding.
 		static void fixedtables(inflate_state state)
 		{
+			// TODO: Use a compiler directive or other option to control this setting correctly.
+            var buildFixed = true;
+            
+            if (buildFixed)
+            {
+                
+                var @fixed = new code[544];
+
+                // literal/length table
+                var sym = 0;
+                while (sym < 144) state.lens[sym++] = 8;
+                while (sym < 256) state.lens[sym++] = 9;
+                while (sym < 280) state.lens[sym++] = 7;
+                while (sym < 288) state.lens[sym++] = 8;
+
+                code[] next = @fixed;
+                uint bits = 9;
+                var tableIndexA = 0;
+                inflate_table(codetype.LENS, state.lens, 0, 288, next, ref tableIndexA, ref bits, state.work);
+                lenfix = next.Take(512).ToArray();
+
+                sym = 0;
+                while (sym < 32) state.lens[sym++] = 5;
+                
+                bits = 5;
+                var tableIndexB = 0;
+                inflate_table(codetype.DISTS, state.lens, 0, 32, next, ref tableIndexB, ref bits, state.work);
+                distfix = next.Take(32).ToArray();
+            }
+
 			state.lencode=lenfix;
 			state.lenbits=9;
 			state.distcode=distfix;
@@ -729,9 +764,11 @@ namespace Free.Ports.zLib
 						state.flags=0;					// expect zlib header
 						if(state.head!=null) state.head.done=-1;
 
+						// TODO: Readd state wrap check and provide option for GUNZIP compiler directive.
+
 						//was if(!(state.wrap & 1) ||	// check if zlib header allowed
 						// ((BITS(8)<<8)+(hold>>8))%31)
-						if((state.wrap&1)==0||			// check if zlib header allowed
+						if(		// check if zlib header allowed
 							((((hold&0xFF)<<8)+(hold>>8))%31)!=0)
 						{
 							strm.msg="incorrect header check";
@@ -1181,12 +1218,14 @@ namespace Free.Ports.zLib
 						hold>>=4;
 						bits-=4;
 
-						if(state.nlen>286||state.ndist>30)
-						{
-							strm.msg="too many length or distance symbols";
-							state.mode=inflate_mode.BAD;
-							break;
-						}
+						// TODO: Add option for PKZIP_BUG_WORKAROUND compiler directive.
+
+						//if(state.nlen>286||state.ndist>30)
+						//{
+						//	strm.msg="too many length or distance symbols";
+						//	state.mode=inflate_mode.BAD;
+						//	break;
+						//}
 						//Tracev((stderr, "inflate:       table sizes ok\n"));
 						state.have=0;
 						state.mode=inflate_mode.LENLENS;
